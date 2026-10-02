@@ -158,7 +158,19 @@
             font-weight: 800;
             color: #f59e0b;
             text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .loading-text {
+            color: #38bdf8;
+            font-size: 1.2rem;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         @keyframes popIn {
@@ -263,7 +275,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAgnge-XdlRqPDO3JvaCxlsFDhNSceItk0",
       authDomain: "sittuwa-c7e5a.firebaseapp.com",
@@ -281,7 +292,6 @@
     let availableNumbers = [];
     let results = [];
 
-    // Fetch Live Data from Real-time Database
     onValue(drawRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -296,6 +306,8 @@
 
     document.getElementById('drawBtn').addEventListener('click', () => {
         const nameInput = document.getElementById('userName');
+        const drawBtn = document.getElementById('drawBtn');
+        const drawResult = document.getElementById('drawResult');
         const name = nameInput.value.trim();
 
         if (!name) {
@@ -303,7 +315,10 @@
             return;
         }
 
-        // Firebase Transaction to prevent duplicate numbers at the same time
+        // Instant UI feedback on click (වහාම වෙනස් වීම)
+        drawBtn.disabled = true;
+        drawResult.innerHTML = `<div class="loading-text">Drawing Lucky Number...</div>`;
+
         runTransaction(drawRef, (currentData) => {
             if (!currentData) {
                 currentData = {
@@ -315,9 +330,7 @@
             let nums = currentData.availableNumbers || [];
             let res = currentData.results || [];
 
-            if (nums.length === 0) {
-                return; // No numbers available
-            }
+            if (nums.length === 0) return;
 
             const randomIndex = Math.floor(Math.random() * nums.length);
             const selectedNumber = nums[randomIndex];
@@ -333,18 +346,22 @@
             if (result.committed) {
                 nameInput.value = '';
                 const lastResult = result.snapshot.val().results.slice(-1)[0];
-                if (lastResult && lastResult.name === name) {
-                    document.getElementById('drawResult').innerHTML = `
-                        <div style="font-size: 0.9rem; color: #94a3b8;">Selected number for ${escapeHtml(name)}:</div>
+                if (lastResult) {
+                    drawResult.innerHTML = `
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Selected number for ${escapeHtml(lastResult.name)}:</div>
                         <div class="number-display">${lastResult.number}</div>
                     `;
                 }
             } else {
-                alert('All numbers have been selected or a technical error occurred.');
+                alert('All numbers have been selected or an error occurred.');
+                drawResult.innerHTML = `<span style="color: #64748b;">Enter your name and draw your number.</span>`;
             }
+            drawBtn.disabled = false;
         }).catch((error) => {
             console.error(error);
             alert('An error occurred while updating data.');
+            drawResult.innerHTML = `<span style="color: #64748b;">Enter your name and draw your number.</span>`;
+            drawBtn.disabled = false;
         });
     });
 
