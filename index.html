@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SITTUWA (Lucky Number Draw)</title>
+    
+    <!-- Faster Connection for Firebase -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://sittuwa-c7e5a-default-rtdb.firebaseio.com" crossorigin>
+
     <style>
         * {
             box-sizing: border-box;
@@ -373,11 +378,11 @@
     }
 
     function escapeHtml(text) {
-        return text.replace(/&/g, "&")
-                   .replace(/</g, "<")
-                   .replace(/>/g, ">")
-                   .replace(/"/g, """)
-                   .replace(/'/g, "'");
+        return text.replace(/&/g, "&amp;")
+                   .replace(/</g, "&lt;")
+                   .replace(/>/g, "&gt;")
+                   .replace(/"/g, "&quot;")
+                   .replace(/'/g, "&#039;");
     }
 </script>
 
