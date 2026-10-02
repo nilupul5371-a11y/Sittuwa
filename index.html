@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML/JS Trading Bot Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121826;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1b2234;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            width: 380px;
+        }
+        h2 { text-align: center; color: #3b82f6; margin-top: 0; }
+        .stat-box {
+            background: #252e42;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+        }
+        .price { font-size: 24px; font-weight: bold; text-align: center; margin: 15px 0; color: #f59e0b; }
+        .status { text-align: center; font-weight: bold; padding: 8px; border-radius: 6px; }
+        .buy { background-color: #10b981; color: white; }
+        .sell { background-color: #ef4444; color: white; }
+        .hold { background-color: #6b7280; color: white; }
+        .btn-container { display: flex; gap: 10px; margin-top: 15px; }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-start { background-color: #10b981; color: white; }
+        .btn-stop { background-color: #ef4444; color: white; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🤖 Auto Trading Bot</h2>
+    
+    <div class="stat-box">
+        <span>Balance (USDT):</span>
+        <span id="balance">1000.00</span>
+    </div>
+    
+    <div class="stat-box">
+        <span>Crypto Holdings:</span>
+        <span id="crypto">0.0000</span>
+    </div>
+
+    <div class="price">
+        BTC Price: $<span id="btcPrice">50000.00</span>
+    </div>
+
+    <div id="botStatus" class="status hold">Bot Paused</div>
+
+    <div class="btn-container">
+        <button id="startBtn" class="btn-start" onclick="startBot()">Start Bot</button>
+        <button id="stopBtn" class="btn-stop" onclick="stopBot()" disabled>Stop Bot</button>
+    </div>
+</div>
+
+<script>
+    // Initial Variables (ආරම්භක දත්ත)
+    let balance = 1000.00;
+    let cryptoHolding = 0.0000;
+    let currentPrice = 50000.00;
+    let isBotRunning = false;
+    let botInterval = null;
+
+    // Price History - Signal හදන්න පාවිච්චි කරන මිල ගණන්
+    let priceHistory = [50000.00];
+
+    // UI Elements
+    const balanceEl = document.getElementById('balance');
+    const cryptoEl = document.getElementById('crypto');
+    const priceEl = document.getElementById('btcPrice');
+    const statusEl = document.getElementById('botStatus');
+
+    // Simulated Market Price (මිල වෙනස් කරන Function එක)
+    function updateMarketPrice() {
+        // -1.5% සහ +1.5% අතර වෙනස් වීමක් (Random Volatility)
+        let changePercent = (Math.random() - 0.49) * 0.03; 
+        currentPrice = currentPrice * (1 + changePercent);
+        
+        // UI එකේ Price එක පෙන්වීම
+        priceEl.innerText = currentPrice.toFixed(2);
+        
+        priceHistory.push(currentPrice);
+        if (priceHistory.length > 5) priceHistory.shift(); // අන්තිම මිල ගණන් 5 විතරක් තියාගන්නවා
+    }
+
+    // Bot Logic - Buy/Sell Signal ගන්නා ස්ථානය
+    function runBotLogic() {
+        updateMarketPrice();
+
+        if (priceHistory.length < 3) return;
+
+        // සරල Strategy එකක්: 
+        // පසුගිය වතාවල් 2ටම වඩා මිල අඩු වුණොත් -> BUY
+        // පසුගිය වතාවල් 2ටම වඩා මිල වැඩි වුණොත් -> SELL
+        let p1 = priceHistory[priceHistory.length - 1];
+        let p2 = priceHistory[priceHistory.length - 2];
+        let p3 = priceHistory[priceHistory.length - 3];
+
+        if (p1 < p2 && p2 < p3 && balance >= 100) {
+            // BUY Logic
+            let buyAmount = 100; // $100 කින් Buy කරනවා
+            cryptoHolding += buyAmount / currentPrice;
+            balance -= buyAmount;
+            
+            statusEl.innerText = "BUY ORDER EXECUTED!";
+            statusEl.className = "status buy";
+        } 
+        else if (p1 > p2 && p2 > p3 && cryptoHolding > 0) {
+            // SELL Logic
+            let sellAmount = cryptoHolding * currentPrice;
+            balance += sellAmount;
+            cryptoHolding = 0;
+
+            statusEl.innerText = "SELL ORDER EXECUTED!";
+            statusEl.className = "status sell";
+        } 
+        else {
+            statusEl.innerText = "Monitoring Market (HOLD)...";
+            statusEl.className = "status hold";
+        }
+
+        // UI Updates
+        balanceEl.innerText = balance.toFixed(2);
+        cryptoEl.innerText = cryptoHolding.toFixed(4);
+    }
+
+    // Start Bot
+    function startBot() {
+        isBotRunning = true;
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        
+        // තත්පර 2කට සැරයක් Trade Logic එක Run වෙනවා
+        botInterval = setInterval(runBotLogic, 2000);
+    }
+
+    // Stop Bot
+    function stopBot() {
+        isBotRunning = false;
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+        
+        clearInterval(botInterval);
+        statusEl.innerText = "Bot Paused";
+        statusEl.className = "status hold";
+    }
+</script>
+
+</body>
+</html>
