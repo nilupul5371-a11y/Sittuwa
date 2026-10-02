@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://sittuwa-c7e5a-default-rtdb.firebaseio.com" crossorigin>
 
+    <!-- Canvas Confetti Library for Colorful Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -292,6 +295,26 @@
     let availableNumbers = [];
     let results = [];
 
+    // Trigger Colorful Confetti Animation
+    function triggerConfetti() {
+        if (typeof confetti === 'function') {
+            const count = 200;
+            const defaults = { origin: { y: 0.7 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55, colors: ['#f59e0b', '#38bdf8'] });
+            fire(0.2, { spread: 60, colors: ['#10b981', '#ec4899'] });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+    }
+
     onValue(drawRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -315,7 +338,7 @@
             return;
         }
 
-        // Instant UI feedback on click (වහාම වෙනස් වීම)
+        // Instant UI feedback on click
         drawBtn.disabled = true;
         drawResult.innerHTML = `<div class="loading-text">Drawing Lucky Number...</div>`;
 
@@ -351,17 +374,19 @@
                         <div style="font-size: 0.9rem; color: #94a3b8;">Selected number for ${escapeHtml(lastResult.name)}:</div>
                         <div class="number-display">${lastResult.number}</div>
                     `;
+                    // Fire colorful confetti celebration!
+                    triggerConfetti();
                 }
             } else {
                 alert('All numbers have been selected or an error occurred.');
                 drawResult.innerHTML = `<span style="color: #64748b;">Enter your name and draw your number.</span>`;
             }
-            drawBtn.disabled = false;
+            renderUI();
         }).catch((error) => {
             console.error(error);
             alert('An error occurred while updating data.');
             drawResult.innerHTML = `<span style="color: #64748b;">Enter your name and draw your number.</span>`;
-            drawBtn.disabled = false;
+            renderUI();
         });
     });
 
