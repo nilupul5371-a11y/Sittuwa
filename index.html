@@ -3,171 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML/JS Trading Bot Dashboard</title>
+    <title>SITTUWA (Lucky Number Draw)</title>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121826;
-            color: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            min-height: 100vh;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
+
         .container {
-            background-color: #1b2234;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 380px;
+            width: 100%;
+            max-width: 900px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        h2 { text-align: center; color: #3b82f6; margin-top: 0; }
-        .stat-box {
-            background: #252e42;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
+
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 25px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: #f1f5f9;
+            margin-bottom: 15px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            font-size: 16px;
         }
-        .price { font-size: 24px; font-weight: bold; text-align: center; margin: 15px 0; color: #f59e0b; }
-        .status { text-align: center; font-weight: bold; padding: 8px; border-radius: 6px; }
-        .buy { background-color: #10b981; color: white; }
-        .sell { background-color: #ef4444; color: white; }
-        .hold { background-color: #6b7280; color: white; }
-        .btn-container { display: flex; gap: 10px; margin-top: 15px; }
-        button {
-            flex: 1;
-            padding: 10px;
+
+        .badge {
+            background: #0284c7;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+        }
+
+        button.btn-submit {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: white;
             border: none;
-            border-radius: 6px;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            width: 100%;
         }
-        .btn-start { background-color: #10b981; color: white; }
-        .btn-stop { background-color: #ef4444; color: white; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        button.btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+        }
+
+        button.btn-submit:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .draw-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            min-height: 160px;
+            text-align: center;
+        }
+
+        .number-display {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #f59e0b;
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            background: #0f172a;
+            color: #38bdf8;
+            font-size: 0.9rem;
+        }
+
+        td {
+            font-size: 0.95rem;
+        }
+
+        .tag-number {
+            display: inline-block;
+            background: #f59e0b;
+            color: #0f172a;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🤖 Auto Trading Bot</h2>
-    
-    <div class="stat-box">
-        <span>Balance (USDT):</span>
-        <span id="balance">1000.00</span>
-    </div>
-    
-    <div class="stat-box">
-        <span>Crypto Holdings:</span>
-        <span id="crypto">0.0000</span>
-    </div>
+    <h1>SITTUWA</h1>
+    <p class="subtitle">Check your lucky number</p>
+    <div class="grid-layout">
+        <!-- Left Side - Form Area -->
+        <div class="card">
+            <div class="card-title">
+                <span>Enter your Name</span>
+                <span class="badge" id="countBadge">Remaining: 12</span>
+            </div>
 
-    <div class="price">
-        BTC Price: $<span id="btcPrice">50000.00</span>
-    </div>
+            <div class="input-group">
+                <label for="userName">Name:</label>
+                <input type="text" id="userName" placeholder="eg: Kamal" autocomplete="off">
+            </div>
 
-    <div id="botStatus" class="status hold">Bot Paused</div>
+            <button class="btn-submit" id="drawBtn">Draw Number</button>
 
-    <div class="btn-container">
-        <button id="startBtn" class="btn-start" onclick="startBot()">Start Bot</button>
-        <button id="stopBtn" class="btn-stop" onclick="stopBot()" disabled>Stop Bot</button>
+            <div style="margin-top: 20px;">
+                <label style="display:block; margin-bottom: 8px;">Selected Number:</label>
+                <div class="draw-box" id="drawResult">
+                    <span style="color: #64748b;">Enter your name and draw your number.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Results Table -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <div class="card">
+                <div class="card-title">List of Selected People (Live Results)</div>
+                <div style="max-height: 380px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Number</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTable">
+                            <tr>
+                                <td colspan="3" class="empty-state">Loading data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>
-    // Initial Variables (ආරම්භක දත්ත)
-    let balance = 1000.00;
-    let cryptoHolding = 0.0000;
-    let currentPrice = 50000.00;
-    let isBotRunning = false;
-    let botInterval = null;
+<!-- Firebase SDKs Module Script -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Price History - Signal හදන්න පාවිච්චි කරන මිල ගණන්
-    let priceHistory = [50000.00];
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgnge-XdlRqPDO3JvaCxlsFDhNSceItk0",
+      authDomain: "sittuwa-c7e5a.firebaseapp.com",
+      databaseURL: "https://sittuwa-c7e5a-default-rtdb.firebaseio.com",
+      projectId: "sittuwa-c7e5a",
+      storageBucket: "sittuwa-c7e5a.firebasestorage.app",
+      messagingSenderId: "323154454106",
+      appId: "1:323154454106:web:c8eb1016b75a70daac9a63"
+    };
 
-    // UI Elements
-    const balanceEl = document.getElementById('balance');
-    const cryptoEl = document.getElementById('crypto');
-    const priceEl = document.getElementById('btcPrice');
-    const statusEl = document.getElementById('botStatus');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const drawRef = ref(db, 'drawState');
 
-    // Simulated Market Price (මිල වෙනස් කරන Function එක)
-    function updateMarketPrice() {
-        // -1.5% සහ +1.5% අතර වෙනස් වීමක් (Random Volatility)
-        let changePercent = (Math.random() - 0.49) * 0.03; 
-        currentPrice = currentPrice * (1 + changePercent);
-        
-        // UI එකේ Price එක පෙන්වීම
-        priceEl.innerText = currentPrice.toFixed(2);
-        
-        priceHistory.push(currentPrice);
-        if (priceHistory.length > 5) priceHistory.shift(); // අන්තිම මිල ගණන් 5 විතරක් තියාගන්නවා
-    }
+    let availableNumbers = [];
+    let results = [];
 
-    // Bot Logic - Buy/Sell Signal ගන්නා ස්ථානය
-    function runBotLogic() {
-        updateMarketPrice();
+    // Fetch Live Data from Real-time Database
+    onValue(drawRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            availableNumbers = data.availableNumbers || [];
+            results = data.results || [];
+        } else {
+            availableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            results = [];
+        }
+        renderUI();
+    });
 
-        if (priceHistory.length < 3) return;
+    document.getElementById('drawBtn').addEventListener('click', () => {
+        const nameInput = document.getElementById('userName');
+        const name = nameInput.value.trim();
 
-        // සරල Strategy එකක්: 
-        // පසුගිය වතාවල් 2ටම වඩා මිල අඩු වුණොත් -> BUY
-        // පසුගිය වතාවල් 2ටම වඩා මිල වැඩි වුණොත් -> SELL
-        let p1 = priceHistory[priceHistory.length - 1];
-        let p2 = priceHistory[priceHistory.length - 2];
-        let p3 = priceHistory[priceHistory.length - 3];
-
-        if (p1 < p2 && p2 < p3 && balance >= 100) {
-            // BUY Logic
-            let buyAmount = 100; // $100 කින් Buy කරනවා
-            cryptoHolding += buyAmount / currentPrice;
-            balance -= buyAmount;
-            
-            statusEl.innerText = "BUY ORDER EXECUTED!";
-            statusEl.className = "status buy";
-        } 
-        else if (p1 > p2 && p2 > p3 && cryptoHolding > 0) {
-            // SELL Logic
-            let sellAmount = cryptoHolding * currentPrice;
-            balance += sellAmount;
-            cryptoHolding = 0;
-
-            statusEl.innerText = "SELL ORDER EXECUTED!";
-            statusEl.className = "status sell";
-        } 
-        else {
-            statusEl.innerText = "Monitoring Market (HOLD)...";
-            statusEl.className = "status hold";
+        if (!name) {
+            alert('Please enter your name!');
+            return;
         }
 
-        // UI Updates
-        balanceEl.innerText = balance.toFixed(2);
-        cryptoEl.innerText = cryptoHolding.toFixed(4);
+        // Firebase Transaction to prevent duplicate numbers at the same time
+        runTransaction(drawRef, (currentData) => {
+            if (!currentData) {
+                currentData = {
+                    availableNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                    results: []
+                };
+            }
+
+            let nums = currentData.availableNumbers || [];
+            let res = currentData.results || [];
+
+            if (nums.length === 0) {
+                return; // No numbers available
+            }
+
+            const randomIndex = Math.floor(Math.random() * nums.length);
+            const selectedNumber = nums[randomIndex];
+
+            nums.splice(randomIndex, 1);
+            res.push({ name: name, number: selectedNumber });
+
+            currentData.availableNumbers = nums;
+            currentData.results = res;
+
+            return currentData;
+        }).then((result) => {
+            if (result.committed) {
+                nameInput.value = '';
+                const lastResult = result.snapshot.val().results.slice(-1)[0];
+                if (lastResult && lastResult.name === name) {
+                    document.getElementById('drawResult').innerHTML = `
+                        <div style="font-size: 0.9rem; color: #94a3b8;">Selected number for ${escapeHtml(name)}:</div>
+                        <div class="number-display">${lastResult.number}</div>
+                    `;
+                }
+            } else {
+                alert('All numbers have been selected or a technical error occurred.');
+            }
+        }).catch((error) => {
+            console.error(error);
+            alert('An error occurred while updating data.');
+        });
+    });
+
+    function renderUI() {
+        document.getElementById('countBadge').innerText = `Remaining: ${availableNumbers.length}`;
+
+        const drawBtn = document.getElementById('drawBtn');
+        if (availableNumbers.length === 0) {
+            drawBtn.disabled = true;
+            drawBtn.innerText = 'All Numbers Selected (Completed)';
+        } else {
+            drawBtn.disabled = false;
+            drawBtn.innerText = 'Draw Number';
+        }
+
+        const tableBody = document.getElementById('resultsTable');
+        if (results.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" class="empty-state">No one has drawn a number yet.</td></tr>`;
+        } else {
+            tableBody.innerHTML = '';
+            results.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="font-weight: 600;">${escapeHtml(item.name)}</td>
+                    <td><span class="tag-number">${item.number}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
     }
 
-    // Start Bot
-    function startBot() {
-        isBotRunning = true;
-        document.getElementById('startBtn').disabled = true;
-        document.getElementById('stopBtn').disabled = false;
-        
-        // තත්පර 2කට සැරයක් Trade Logic එක Run වෙනවා
-        botInterval = setInterval(runBotLogic, 2000);
-    }
-
-    // Stop Bot
-    function stopBot() {
-        isBotRunning = false;
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('stopBtn').disabled = true;
-        
-        clearInterval(botInterval);
-        statusEl.innerText = "Bot Paused";
-        statusEl.className = "status hold";
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&")
+                   .replace(/</g, "<")
+                   .replace(/>/g, ">")
+                   .replace(/"/g, """)
+                   .replace(/'/g, "'");
     }
 </script>
 
